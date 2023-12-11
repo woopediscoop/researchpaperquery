@@ -1,0 +1,210 @@
+import express from 'express';
+
+import { getUsers, getUserBySessionToken, updateUserById } from '../db/users.js';
+import {QueryPine} from '../scripts/pinecone.js';
+import {Prompt} from '../scripts/llm.js';
+import pkg from 'lodash';
+import PdfParse from 'pdf-parse';
+import multer from 'multer';
+const { get } = pkg;
+
+
+export const getAllUsers = async (req: express.Request, res: express.Response) => {
+    try{
+        const users = await getUsers();
+        return res.status(200).json(users);
+    } catch (error) {
+        console.log("error");
+        return res.sendStatus(400);
+    }
+};
+
+export const getCurrentUser = async(req: express.Request, res: express.Response) => {
+    try{
+        const sessionToken = req.cookies['USER-AUTH'];
+        if(!sessionToken){
+            console.log("Session Token doesn't exist");
+            res.sendStatus(400);
+        }
+        const user = await getUserBySessionToken(sessionToken);
+        if(!user){
+            console.log("User doesn't exist");
+            return res.sendStatus(400);
+        }
+        return res.sendStatus(200).json(user).end();
+    } catch(error){
+        console.log(error);
+        return res.sendStatus(400);
+    }
+
+}
+
+export const postNamespaceBySessionToken = async (req: express.Request, res: express.Response) => {
+    try{
+        const sessionToken = req.cookies['USER-AUTH'];
+        if(!sessionToken){
+            console.log("Session Token doesn't exist");
+            return res.sendStatus(400);
+        }
+        const user = await getUserBySessionToken(sessionToken);
+        if(!user){
+            console.log("User doesn't exist");
+            return res.sendStatus(400);
+        }
+
+        const newNamespace = req.body.newnamespace;
+        if(!newNamespace){
+            console.log("Namespace parameter missing");
+            return res.sendStatus(400);
+        }
+
+        let allNamespaces: any[] = [];
+        const users = await getUsers();
+        users.forEach(user => {
+            allNamespaces.push(...user.namespaces)
+            console.log(allNamespaces)
+        })
+        
+
+        if (allNamespaces.includes(newNamespace)){
+            console.log("Index already exists")
+            return res.json({'message':'Namespace already exists!',
+                            'success':false});
+        }
+
+        const updatedNamespaces = [...user.namespaces, newNamespace]
+
+        await updateUserById(user._id.toString(), {namespaces: updatedNamespaces})
+        return res.json({'message':'Namespace added!', 'success':true});
+
+    } catch (error) {
+        console.log(error)
+        return res.sendStatus(400);
+    }
+}
+
+
+
+
+export const postPDF = async (req : express.Request, res: express.Response) => {
+    try{
+        const sessionToken = req.cookies['USER-AUTH'];
+        if(!sessionToken){
+            console.log("Session Token doesn't exist");
+            return res.sendStatus(400);
+        }
+        const user = await getUserBySessionToken(sessionToken);
+        if(!user){
+            console.log("User doesn't exist");
+            return res.sendStatus(400);
+        }
+        console.log(req)
+        PdfParse(req.body.file).then(function(data){
+            console.log(data.text);
+            return res.sendStatus(200);
+        })
+
+
+    } catch(error){
+        console.log(error);
+        return res.sendStatus(400);
+    }
+}
+
+export const vectorQuery = async (req: express.Request, res: express.Response) => {
+    return res.json(await QueryPine(req.body.name, req.body.namespace, req.body.query));
+}
+
+export const promptQuery = async (req: express.Request, res: express.Response) => {
+    const matches = await QueryPine(req.body.name, req.body.namespace, req.body.vecprompt)
+    let excerpts = "";
+    for(let i = 0; i < matches.length; i++){
+        
+        excerpts += i.toString()+": "+matches[i].metadata.text.toString()+"\n\n\n";
+    }
+    console.log(excerpts)
+    const llmResponse = await Prompt(excerpts, req.body.llmprompt);
+    return res.json(llmResponse);
+}
+
+
+export const selectNamespaceBySessionToken = async (req: express.Request, res: express.Response) => {
+    try{
+        const sessionToken = req.cookies['USER-AUTH'];
+        if(!sessionToken){
+            console.log("Session Token doesn't exist");
+            return res.sendStatus(400);
+        }
+        const user = await getUserBySessionToken(sessionToken);
+        if(!user){
+            console.log("User doesn't exist");
+            return res.sendStatus(400);
+        }
+
+        const selectedNamespace = req.body.currentNamespace;
+        if(!selectedNamespace){
+            console.log("Namespace parameter missing");
+            return res.sendStatus(400);
+        }
+        if(user.namespaces.includes(selectedNamespace)){
+            await updateUserById(user._id.toString(), {currentNamespace:selectedNamespace});
+            return res.sendStatus(200);
+        } else {
+            console.log("Namespace doesn't exist")
+            return res.sendStatus(400);
+        }
+
+    } catch (error){
+        console.log(error)
+        return res.sendStatus(400);
+    }
+}
+
+export const getNamespacesBySessionToken = async (req: express.Request, res: express.Response) => {
+    try{
+        const sessionToken = req.cookies['USER-AUTH'];
+        if(!sessionToken){
+            console.log("Session Token doesn't exist");
+            return res.sendStatus(400);
+        }
+        const user = await getUserBySessionToken(sessionToken);
+        if(!user){
+            console.log("User doesn't exist");
+            return res.sendStatus(400);
+        }
+;
+        return res.json({
+            namespaces: user.namespaces
+        })
+
+    } catch(error)
+        {
+            console.log(error)
+            return res.sendStatus(400);
+        }
+}
+
+
+export const getCurrentNamespaceBySessionToken = async (req: express.Request, res: express.Response) => {
+    try{
+        const sessionToken = req.cookies['USER-AUTH'];
+        if(!sessionToken){
+            console.log("Session Token doesn't exist");
+            return res.sendStatus(400);
+        }
+        const user = await getUserBySessionToken(sessionToken);
+        if(!user){
+            console.log("User doesn't exist");
+            return res.sendStatus(400);
+        }
+;
+        return res.json({
+            namespace: user.currentNamespace
+        })
+
+    } catch(error)
+        {
+            console.log(error)
+            return res.sendStatus(400);
+        }
+}
