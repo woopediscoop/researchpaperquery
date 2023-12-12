@@ -6,15 +6,19 @@ import compression from 'compression';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import router from './router/index.js';
+import {fileURLToPath} from 'url';
+import path from 'path';
 import multer from 'multer';
 import PdfParse from 'pdf-parse';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const app = express()
 
 app.use(cors({
     credentials: true,
 }));
-app.use(express.static('./public'))
+app.use(express.static(path.join(__dirname,'public')));
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
