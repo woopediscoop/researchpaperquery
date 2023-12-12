@@ -15,7 +15,7 @@ app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
 const server = http.createServer(app);
-const port = 3000;
+const port = process.env.PORT || 3000;
 server.listen(port);
 const MONGO_URL = 'mongodb+srv://rotelanza1984:QueGuay123@testcluster.eaos9pa.mongodb.net/?retryWrites=true&w=majority';
 mongoose.Promise = Promise;

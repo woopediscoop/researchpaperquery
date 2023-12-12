@@ -1,0 +1,158 @@
+<div id="app">
+
+    <div id="menubar">
+      <ul class="menu">
+        <li><a :href="getUrl('home')">Home</a></li>
+        <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
+        <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
+      </ul>
+      <ul class="menu">
+        <li>
+            <select v-model="currentNamespace" @change="ChangeCurrentNamespace">
+                <option v-for="ns in namespaces" :value="ns">{{ns}}</option>
+            </select>
+        </li>
+        <li><a :href="getUrl('uploadpdf')">Add Namespace</a></li>
+      </ul>
+    </div>
+    <label for="NamespaceTxt">Namespace</label>
+    <input type="text" v-model="NamespaceTxt" id="NamespaceTxt">
+    <input type="file" accept="pdf" ref="pdfInput">
+    <button @click="UpdateNamespace()">Hochladen</button>
+    <p>{{status}}</p>
+    <p>{{msg}}</p>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+
+<script type="module">
+    import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+    const API_URL="https://researchpaperquery.azurewebsites.net/";
+
+    createApp({
+      data() {
+        return {
+            currentNamespace:'',
+            status:'',
+            NamespaceTxt:'',
+            msg:''
+        }
+      },
+      methods:{
+        async UpdateNamespace(){
+            const fileInput = this.$refs.pdfInput;
+            const pdf = fileInput.files[0];
+            if(this.NamespaceTxt != '' && pdf){
+                try{
+                    axios.post(API_URL+'users/updatenamespaces', {"newnamespace":this.NamespaceTxt})
+                    .then(response => {
+                        this.msg = response.data.message;
+                        if(response.data.success){
+                            this.namespaces.push(this.NamespaceTxt);
+                            this.currentNamespace = this.NamespaceTxt;
+                            this.submitPDF();
+                        }
+                    });
+                }
+                catch(error){
+                    this.msg = "Namespace exists already"
+                }
+            }else{
+                this.status="Namespace bennenen und PDF hochladen!";
+            }
+        },
+        async submitPDF(){
+            const fileInput = this.$refs.pdfInput;
+            const pdf = fileInput.files[0];
+
+            if(pdf){
+                this.status = "Lädt hoch, bitte warten";
+                const formData = new FormData();
+                formData.append('File',pdf);
+                formData.append('namespace',this.currentNamespace);
+                console.log(...formData)
+                await axios.post(API_URL+'postpdf', formData, {
+                    headers: {
+                        'Content-Type' : 'multipart/form-data',
+                    },
+                })
+                .then(response => {
+                    console.log('File uploaded successfully', response)
+                    if(response.data.success){
+                        this.status = "PDF hochgeladen auf Namespace "+this.currentNamespace+"! \n Jetzt können Sie Vektorsuchanfragen und LLM Prompts auf diesem Index durchführen."
+                    }
+                    })
+                .catch(error => {
+                    console.error('Error uploading file',error)
+                })
+            }else{
+                console.warn('No file selected')
+            }
+        },
+        getUrl(tag){
+            return API_URL+tag;
+        },
+        async GetCurrentNamespace(){
+            try{
+                await axios.get(API_URL+'users/getcurrentnamespace')
+                .then(response => {
+                    this.currentNamespace = response.data.namespace;
+                    
+                })
+            } catch(error){
+                console.log(error);
+            }
+        },
+        async GetNamespaces(){
+            try{
+                await axios.get(API_URL+'users/getnamespaces')
+                .then(response => {
+                    this.namespaces = response.data.namespaces;
+                })
+
+            } catch(error){
+                console.log(error);
+            }
+        },
+        async ChangeCurrentNamespace(){
+            try{
+                await axios.post(API_URL+'users/updatecurrentnamespace', {
+                currentNamespace:this.currentNamespace
+                })
+            } catch(error){
+                console.log(error);
+            }
+        }
+        },
+        mounted(){
+            this.GetNamespaces();
+            this.GetCurrentNamespace();
+        }
+        
+      }).mount('#app')
+  </script>
+
+
+<style>
+
+    #menubar {
+     display: flex;
+     justify-content: space-between;
+     padding: 10px;
+   }
+  
+   .menu {
+     list-style: none;
+     margin: 0;
+     padding: 0;
+     display: flex;
+   }
+  
+   .menu li {
+     margin-right: 15px;
+   }
+  
+  </style>
