@@ -1,6 +1,6 @@
 import { getUserByEmail, createUser } from "../db/users.js";
 import { random, authentication } from '../helpers/index.js';
-const host = 'https://researchpaperquery.onrender.com';
+const host = 'researchpaperquery.onrender.com';
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
