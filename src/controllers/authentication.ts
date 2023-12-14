@@ -2,7 +2,7 @@ import express from "express";
 import { getUserByEmail, createUser } from "../db/users.js";
 import { random, authentication } from '../helpers/index.js';
 
-const host = 'https://researchpaperquery.azurewebsites.net';
+const host = 'https://researchpaperquery.onrender.com';
 
 export const login = async (req: express.Request, res: express.Response) => {
     try {
@@ -31,7 +31,7 @@ export const login = async (req: express.Request, res: express.Response) => {
         user.authentication.sessionToken = authentication(salt, user._id.toString());
 
         await user.save();
-        res.cookie('USER-AUTH', user.authentication.sessionToken, { domain: host, path : '/'});
+        res.cookie('USER-AUTH', user.authentication.sessionToken, { domain: host, path : '/', sameSite : "strict"});
         return res.json({'page':'home'})
         //return res.status(200).json(user).end();
 
