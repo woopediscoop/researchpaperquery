@@ -2,7 +2,6 @@ import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import tiktoken from 'tiktoken';
 import { Pinecone } from '@pinecone-database/pinecone';
-const OPENAI_API_KEY = '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';
 const tokenizer = tiktoken.get_encoding('cl100k_base');
 const tiktoken_len = (text) => {
     const tokens = tokenizer.encode(text);
@@ -19,7 +18,7 @@ const textToChunks = async (textdata) => {
 const model_name = 'text-embedding-ada-002';
 const embed = new OpenAIEmbeddings({
     modelName: model_name,
-    openAIApiKey: OPENAI_API_KEY
+    openAIApiKey: process.env.OPENAI_API_KEY
 });
 const Embeddings = (chunks) => {
     console.log(chunks);
