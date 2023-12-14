@@ -41,8 +41,7 @@
     "multer": "^1.4.5-lts.1",
     "ncp": "^2.0.0",
     "openai": "^4.20.1",
-    "pdf-parse": "^1.1.1",
-    "pdf2json": "^3.0.5",
+    "pdf-parse": "git+https://github.com/woopediscoop/pdfparseremovespace.git",
     "pinecone": "^0.1.0",
     "tiktoken": "^1.0.11"
   }
