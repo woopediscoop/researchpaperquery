@@ -28,6 +28,7 @@ export const getCurrentUser = async(req: express.Request, res: express.Response)
         }
         const user = await getUserBySessionToken(sessionToken);
         if(!user){
+            user._id
             console.log("User doesn't exist");
             return res.sendStatus(400);
         }
