@@ -13,6 +13,8 @@ import PdfParse from 'pdf-parse';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+//changes: package.json node dist/index.js and prestart:npm run build and Openai api key in pinecone.ts and llm.ts process.env.OPENAI_API_KEY
+
 export const app = express()
 
 app.use(cors({

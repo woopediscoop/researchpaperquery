@@ -24,21 +24,7 @@ import mongoose, { mongo } from "mongoose";
    pdfname: {type:String},
  });
 
- const GuidelineSetSchema = new mongoose.Schema({
-   name:{type:String, required: true},
 
-   Guidelines:{type:Array<mongoose.Schema.Types.ObjectId>, ref:'Guidelines'}
- });
-
- const GuidelineSchema = new mongoose.Schema({
-   nr:{type:Number, required:true},
-   itemToCheck:{type:String, required: true},
-   description:{type:String},
-   importance:{type:String, required: true},
-   note:{type:String},
-
-   GuidelineSet:{type: mongoose.Schema.Types.ObjectId, required: true, ref:'GuidelineSet'}
- });
 
  const VectorQuerySchema = new mongoose.Schema({
    prompt: {type:String, required:true},
@@ -52,8 +38,8 @@ import mongoose, { mongo } from "mongoose";
    Namespace: {type:mongoose.Schema.Types.ObjectId, required: true, ref:'Namespace'},
  });
 
- const CorrectPassagesSchema = new mongoose.Schema({
-   passages:{type:Array<String>, required: true},
+ const CorrectPassageSchema = new mongoose.Schema({
+   passages:{type:String, required: true},
 
    Directory:{type:mongoose.Schema.Types.ObjectId, required: true, ref:'Directory'},
    Guideline:{type:mongoose.Schema.Types.ObjectId, required: true, ref:'Guideline'},
@@ -81,33 +67,25 @@ import mongoose, { mongo } from "mongoose";
  export const getDirectories = () => DirectoryModel.find();
  export const getDirectoryById = (id: mongoose.Schema.Types.ObjectId) => DirectoryModel.findById(id);
 
- export const GuidelineSetModel = mongoose.model('GuidelineSet', GuidelineSetSchema);
- export const createGuidelineSet = (values : Record<string, any>) => new GuidelineSetModel(values).save().then((gset) => gset.toObject());
- export const getGuidelineSetByName = (name: string) => GuidelineSetModel.findOne({name: name});
-
- export const GuidelineModel = mongoose.model('Guideline', GuidelineSchema);
- export const createGuideline = (values: Record<string, any>) => new GuidelineModel(values).save().then((guideline) => guideline.toObject());
- export const getGuidelineBySetAndNr = ({set_id, nr}) => GuidelineModel.findOne({
-   _id:set_id,
-   nr:nr
- });
 
  export const VectorQueryModel = mongoose.model('VectorQuery', VectorQuerySchema);
  export const createVectorQuery = (values : Record<string, any>) => new VectorQueryModel(values).save().then((vquery) => vquery.toObject());
  export const getVectorQueryByGuideline = (guideline_id : mongoose.Schema.Types.ObjectId) => VectorQueryModel.findOne({Guideline:guideline_id});
  export const getVectorQueryByGuidelineAndUser = ({guideline_id, user_id}) => VectorQueryModel.findOne({Guideline:guideline_id, User:user_id});
  export const getVectorQueryByUserAndGuidelineSet = (user : mongoose.Schema.Types.ObjectId) => VectorQueryModel.findOne({User:user});
+ export const deleteVectorQueryById = (id : mongoose.Schema.Types.ObjectId) => VectorQueryModel.findOneAndDelete({_id:id});
 
- export const CorrectPassagesModel = mongoose.model('CorrectPassages', CorrectPassagesSchema);
- export const createCorrectPassages = (values: Record<string, any>) => new CorrectPassagesModel(values).save().then((correctPassage) => correctPassage.toObject());
- export const getCorrectPassagesByGuidelineAndDirectory = ({guideline_id, directory_id}) => CorrectPassagesModel.findOne({Guideline:guideline_id,Directory:directory_id});
- export const updateCorrectPassagesByGuidelineAndDirectory = ({guideline_id, directory_id, passages}) => CorrectPassagesModel.findOneAndUpdate({Guideline:guideline_id,Directory:directory_id},{passages:passages})
+ export const CorrectPassageModel = mongoose.model('CorrectPassages', CorrectPassageSchema);
+ export const createCorrectPassage = (values: Record<string, any>) => new CorrectPassageModel(values).save().then((correctPassage) => correctPassage.toObject());
+ export const getCorrectPassageByGuidelineAndDirectory = ({guideline_id, directory_id}) => CorrectPassageModel.findOne({Guideline:guideline_id,Directory:directory_id});
+ export const updateCorrectPassageByGuidelineAndDirectory = ({guideline_id, directory_id, passages}) => CorrectPassageModel.findOneAndUpdate({Guideline:guideline_id,Directory:directory_id},{passages:passages})
+ export const deleteCorrectPassageById = (id : mongoose.Schema.Types.ObjectId) => CorrectPassageModel.findOneAndDelete({_id:id});
 
  export const CheckingPromptModel = mongoose.model('CheckingPrompt', CheckingPromptSchema);
  export const createCheckingPrompt = (values: Record<string, any>) => new CheckingPromptModel(values).save().then((checkingPrompt) => checkingPrompt.toObject());
  export const getCheckingPromptByVectorQuery = (vectorquery_id: mongoose.Schema.Types.ObjectId) => CheckingPromptModel.findOne({VectorResult:vectorquery_id});
  export const getCheckingPromptByVectorQueryAndUser = ({vectorquery_id,user_id}) => CheckingPromptModel.findOne({VectorResult:vectorquery_id, User:user_id});
-
+ export const deleteCheckingPromptById = (id : mongoose.Schema.Types.ObjectId) => CheckingPromptModel.findOneAndDelete({_id:id});
  
 
  export const UserModel = mongoose.model('User', UserSchema);
