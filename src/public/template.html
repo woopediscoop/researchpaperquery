@@ -8,23 +8,13 @@
         <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
         <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
         <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
+        
       </ul>
       <ul class="menu">
-        <li>
-            <select v-model="currentNamespace" @change="ChangeCurrentNamespace">
-                <option v-for="ns in namespaces" :value="ns">{{ns}}</option>
-            </select>
-        </li>
-        <li><a :href="getUrl('uploadpdf')">Add Namespace</a></li>
+        <li>{{user.name}}</li>
       </ul>
     </div>
-    <label for="VecPrompt">Vektorsuchprompt: </label>
-    <input type="text" id="VecPropmt" v-model="VecPrompt">
-    <br>
-    <label for="LLMPrompt">LLM Prompt: </label>
-    <input type="text" id="LLMPrompt" v-model="LLMPrompt">
-    <button @click="Search()">Suchen!</button>
-    <p>{{res}}</p>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -33,41 +23,32 @@
 
 <script type="module">
     import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-    const API_URL="https://researchpaperquery.onrender.com/";
+    const API_URL="http://localhost:3000/";
 
     createApp({
       data() {
         return {
             currentNamespace:'',
-            VecPrompt:'',
-            LLMPrompt:'',
-            res:''
+            guidelinesets: [],
+            currentGLSet:'',
+            user:{},
+
         }
       },
       methods:{
-        async Search(){
+        async getUser(){
             try{
-                if(this.VecPrompt != '' && this.LLMPrompt != ''){
-                    this.res = "In progress! Please wait"
-                    axios.post(API_URL+'promptquery', {
-                        'name':'pdfsearch',
-                        'namespace':this.currentNamespace,
-                        'vecprompt':this.VecPrompt,
-                        'llmprompt':this.LLMPrompt
-                    }).then(response => {
-                        this.res = response.data.content;
-                    })
-                }
-                else{
-                    this.res = "Fill both input fields!";
-                }
-            }
-            catch(error){
+                await axios.get(API_URL+'users/getuser')
+                .then(response => {
+                    this.user = response.data.user;
+                })
+            } catch(error){
                 console.log(error);
             }
         },
         getUrl(tag){
             return API_URL+tag;
+            
         },
         async GetCurrentNamespace(){
             try{
@@ -103,7 +84,7 @@
         },
         async mounted(){
             await this.GetNamespaces();
-            await this.GetCurrentNamespace();
+            await this.getUser();
         }
         
       }).mount('#app')

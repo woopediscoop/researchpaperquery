@@ -10,21 +10,18 @@
         <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
       </ul>
       <ul class="menu">
-        <li>
-            <select v-model="currentNamespace" @change="ChangeCurrentNamespace">
-                <option v-for="ns in namespaces" :value="ns">{{ns}}</option>
-            </select>
-        </li>
-        <li><a :href="getUrl('uploadpdf')">Add Namespace</a></li>
+        <li>{{user.name}}</li>
       </ul>
     </div>
-    <label for="VecPrompt">Vektorsuchprompt: </label>
-    <input type="text" id="VecPropmt" v-model="VecPrompt">
+
+    <h2>Guideline Sets</h2>
+    <p>Choose Guideline-Set</p>
+    <select v-model="currentGLSet" @change="ChangeCurrentGLSet">
+        <option v-for="gset in guidelinesets" :value="gset._id">{{gset.name}}</option>
+    </select>
     <br>
-    <label for="LLMPrompt">LLM Prompt: </label>
-    <input type="text" id="LLMPrompt" v-model="LLMPrompt">
-    <button @click="Search()">Suchen!</button>
-    <p>{{res}}</p>
+    <button @click="CreateNewGL" v-if="currentGLSet!=''">Edit this Set</button>
+    <button @click="CreateNewGLSet">Create new GuidelineSet</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -39,35 +36,45 @@
       data() {
         return {
             currentNamespace:'',
-            VecPrompt:'',
-            LLMPrompt:'',
-            res:''
+            guidelinesets: [],
+            currentGLSet:'',
+            user:{},
+
         }
       },
       methods:{
-        async Search(){
+        async getUser(){
             try{
-                if(this.VecPrompt != '' && this.LLMPrompt != ''){
-                    this.res = "In progress! Please wait"
-                    axios.post(API_URL+'promptquery', {
-                        'name':'pdfsearch',
-                        'namespace':this.currentNamespace,
-                        'vecprompt':this.VecPrompt,
-                        'llmprompt':this.LLMPrompt
-                    }).then(response => {
-                        this.res = response.data.content;
-                    })
-                }
-                else{
-                    this.res = "Fill both input fields!";
-                }
-            }
-            catch(error){
+                await axios.get(API_URL+'users/getuser')
+                .then(response => {
+                    this.user = response.data.user;
+                })
+            } catch(error){
                 console.log(error);
             }
         },
+        async CreateNewGL() {
+            window.location.href= (API_URL+'guidelines/addgl')
+        },
+        async CreateNewGLSet(){
+            window.location.href = (API_URL+'guidelines/makeglset');
+        },
+        async ChangeCurrentGLSet(){
+            await axios.post(API_URL+'users/updatecurrentglset', {guidelineset:this.currentGLSet})
+            .then(response => {
+                console.log(response);
+            })
+        },
+        async getGLSets(){
+            await axios.get(API_URL+'guidelines/getsets')
+                .then(response => {
+                    console.log(response.data);
+                    this.guidelinesets = response.data;
+                });
+        },
         getUrl(tag){
             return API_URL+tag;
+            
         },
         async GetCurrentNamespace(){
             try{
@@ -104,6 +111,8 @@
         async mounted(){
             await this.GetNamespaces();
             await this.GetCurrentNamespace();
+            await this.getGLSets();
+            await this.getUser();
         }
         
       }).mount('#app')

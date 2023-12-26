@@ -10,21 +10,15 @@
         <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
       </ul>
       <ul class="menu">
-        <li>
-            <select v-model="currentNamespace" @change="ChangeCurrentNamespace">
-                <option v-for="ns in namespaces" :value="ns">{{ns}}</option>
-            </select>
-        </li>
-        <li><a :href="getUrl('uploadpdf')">Add Namespace</a></li>
+        <li>{{user.name}}</li>
       </ul>
     </div>
-    <label for="VecPrompt">Vektorsuchprompt: </label>
-    <input type="text" id="VecPropmt" v-model="VecPrompt">
-    <br>
-    <label for="LLMPrompt">LLM Prompt: </label>
-    <input type="text" id="LLMPrompt" v-model="LLMPrompt">
-    <button @click="Search()">Suchen!</button>
-    <p>{{res}}</p>
+
+    <ul>
+        <li v-for="dir in directories">{{dir.name}} | from PDF {{dir.pdfname}} | {{dir.description}}</li>
+    </ul>
+    <button @click="NewDir">Create new Directory</button>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -39,35 +33,37 @@
       data() {
         return {
             currentNamespace:'',
-            VecPrompt:'',
-            LLMPrompt:'',
-            res:''
+            guidelinesets: [],
+            directories:[],
+            currentGLSet:'',
+            user:{},
+
         }
       },
       methods:{
-        async Search(){
+        async getUser(){
             try{
-                if(this.VecPrompt != '' && this.LLMPrompt != ''){
-                    this.res = "In progress! Please wait"
-                    axios.post(API_URL+'promptquery', {
-                        'name':'pdfsearch',
-                        'namespace':this.currentNamespace,
-                        'vecprompt':this.VecPrompt,
-                        'llmprompt':this.LLMPrompt
-                    }).then(response => {
-                        this.res = response.data.content;
-                    })
-                }
-                else{
-                    this.res = "Fill both input fields!";
-                }
-            }
-            catch(error){
+                await axios.get(API_URL+'users/getuser')
+                .then(response => {
+                    this.user = response.data.user;
+                })
+            } catch(error){
                 console.log(error);
             }
         },
+        NewDir(){
+            window.location.href = API_URL+'directories/create'
+        },  
+        async getDirectories(){
+            await axios.get(API_URL+'dirs/getall')
+            .then((response) => {
+                this.directories = response.data;
+                console.log(this.directories);
+            })
+        },
         getUrl(tag){
             return API_URL+tag;
+            
         },
         async GetCurrentNamespace(){
             try{
@@ -103,7 +99,8 @@
         },
         async mounted(){
             await this.GetNamespaces();
-            await this.GetCurrentNamespace();
+            await this.getDirectories();
+            await this.getUser();
         }
         
       }).mount('#app')

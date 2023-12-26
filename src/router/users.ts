@@ -3,9 +3,12 @@ import multer from 'multer';
 import PdfParse from 'pdf-parse';
 
 import { getAllUsers, postNamespaceBySessionToken, selectNamespaceBySessionToken
-, getNamespacesBySessionToken, getCurrentNamespaceBySessionToken, vectorQuery, promptQuery } from '../controllers/users.js';
+, getNamespacesBySessionToken, getCurrentNamespaceBySessionToken, 
+updateUserCurrentGLSet, getCurrentUser,
+vectorQuery, promptQuery } from '../controllers/users.js';
 import { isAuthenticated, deleteUser, existsNamespace } from '../middlewares/index.js';
 import { QueryPine, PineUpload } from '../scripts/pinecone.js';
+import { getCurrentGLSet } from '../controllers/guidelines.js';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -16,8 +19,11 @@ const index_name = 'pdfsearch';
 export default (router: express.Router) => {
     
     router.get('/users', isAuthenticated, getAllUsers);
+    router.get('/users/getuser', isAuthenticated, getCurrentUser);
     router.post('/users/updatenamespaces', postNamespaceBySessionToken);
     router.post('/users/updatecurrentnamespace', selectNamespaceBySessionToken);
+    router.post('/users/updatecurrentglset', updateUserCurrentGLSet);
+    router.get('/users/getcurrentglset', getCurrentGLSet)
     
     router.get('/users/getnamespaces', getNamespacesBySessionToken);
     router.get('/users/getcurrentnamespace', getCurrentNamespaceBySessionToken);
