@@ -8,7 +8,12 @@ const UserSchema = new mongoose.Schema({
         sessionToken: { type: String, select: false },
     },
     namespaces: { type: (Array) },
-    currentNamespace: { type: String }
+    currentNamespace: { type: String },
+    // Namespaces are legacy, later will update to Directories:
+    CurrentDirectory: { type: String, ref: 'Directory' },
+    VectorQueries: { type: (Array), ref: 'VectorQueries' },
+    CheckingPrompts: { type: (Array), ref: 'CheckingPrompts' },
+    CurrentGuidelineSet: { type: String, ref: 'CurrentGuidelineSet' },
 });
 export const UserModel = mongoose.model('User', UserSchema);
 export const getUsers = () => UserModel.find();

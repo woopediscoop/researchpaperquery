@@ -3,25 +3,22 @@
     <div id="menubar">
       <ul class="menu">
         <li><a :href="getUrl('home')">Home</a></li>
+        <li><a :href="getUrl('guidelines')">Guidelines</a></li>
+        <li><a :href="getUrl('directories')">Directories</a></li>
         <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
+        <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
         <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
       </ul>
       <ul class="menu">
-        <li>
-            <select v-model="currentNamespace" @change="ChangeCurrentNamespace">
-                <option v-for="ns in namespaces" :value="ns">{{ns}}</option>
-            </select>
-        </li>
-        <li><a :href="getUrl('uploadpdf')">Add Namespace</a></li>
+        <li>{{user.username}}</li>
       </ul>
     </div>
 
     <h2>Welcome!</h2>
-    <p>On this page you can upload a PDF, which you can query through Vectorsearch.
-        <br>To upload a PDF, make a new Namespace, which will represent your file, and then upload your PDF!.
-        <br>To query that PDF, go to the menu points VectorSearch or VectorSearch with LLM, and select your namespace
-        <br>of choice to query in the menu bar.
-        <br>Merry Querying!
+    <p>Update: Namespaces are now called Directories. 
+        <br>We Query now by Guideline and Directory, and filter them if they have the right result.
+        <br>Directories and Guidelines are now global for all Users.
+        <br>If you want to search for previous queries, you can do so in the Filter Queries tab.
     </p>
 
 </div>
@@ -37,10 +34,21 @@
     createApp({
       data() {
         return {
-            currentNamespace:''
+            currentNamespace:'',
+            user:{},
         }
       },
       methods:{
+        async getUser(){
+            try{
+                await axios.get(API_URL+'users/getuser')
+                .then(response => {
+                    this.user = response.data.user;
+                })
+            } catch(error){
+                console.log(error);
+            }
+        },
         getUrl(tag){
             return API_URL+tag;
         },
@@ -76,9 +84,10 @@
             }
         }
         },
-        mounted(){
-            this.GetNamespaces();
-            this.GetCurrentNamespace();
+        async mounted(){
+            await this.GetNamespaces();
+            await this.GetCurrentNamespace();
+            await this.getUser();
         }
         
       }).mount('#app')

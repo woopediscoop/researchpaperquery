@@ -22,15 +22,38 @@ export const getCurrentUser = async (req, res) => {
             res.sendStatus(400);
         }
         const user = await getUserBySessionToken(sessionToken);
+        console.log(user);
         if (!user) {
+            user._id;
             console.log("User doesn't exist");
             return res.sendStatus(400);
         }
-        return res.sendStatus(200).json(user).end();
+        return res.json({ user: user });
     }
     catch (error) {
         console.log(error);
         return res.sendStatus(400);
+    }
+};
+export const updateUserCurrentGLSet = async (req, res) => {
+    try {
+        const currentgl_id = req.body.guidelineset;
+        const sessionToken = req.cookies['USER-AUTH'];
+        if (!sessionToken) {
+            console.log("Session Token doesn't exist");
+            res.sendStatus(400);
+        }
+        const user = await getUserBySessionToken(sessionToken);
+        if (!user) {
+            user._id;
+            console.log("User doesn't exist");
+            return res.sendStatus(400);
+        }
+        const updatedUser = await updateUserById(user.id, { CurrentGuidelineSet: currentgl_id });
+        return res.json(updatedUser);
+    }
+    catch (error) {
+        return res.json({ error: error });
     }
 };
 export const postNamespaceBySessionToken = async (req, res) => {
