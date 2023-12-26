@@ -5,9 +5,10 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon",
+    "start": "node dist/index.js",
     "build": "tsc && npm run copy-public",
-    "copy-public": "ncp src/public dist/public"
+    "copy-public": "ncp src/public dist/public",
+    "pre-start": "npm run build"
   },
   "keywords": [],
   "author": "",

@@ -26,7 +26,7 @@ const textToChunks = async (textdata) => {
 const model_name = 'text-embedding-ada-002';
 const embed = new OpenAIEmbeddings( {
     modelName:model_name,
-    openAIApiKey:'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'
+    openAIApiKey:process.env.OPENAI_API_KEY
 });
 
 const Embeddings = (chunks) => {

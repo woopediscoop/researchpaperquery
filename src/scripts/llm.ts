@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-    apiKey: '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',
+    apiKey: process.env.OPENAI_API_KEY,
 });
 
 export const Prompt = async  (vecResults : string, llmprompt : string) => {

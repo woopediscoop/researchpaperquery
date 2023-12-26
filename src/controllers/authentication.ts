@@ -2,7 +2,7 @@ import express from "express";
 import { getUserByEmail, createUser } from "../db/users.js";
 import { random, authentication } from '../helpers/index.js';
 
-const host = 'localhost';
+const host = 'researchpaperquery.onrender.com';
 
 export const login = async (req: express.Request, res: express.Response) => {
     try {
