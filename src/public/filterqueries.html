@@ -1,0 +1,220 @@
+<div id="app">
+
+    <div id="menubar">
+      <ul class="menu">
+        <li><a :href="getUrl('home')">Home</a></li>
+        <li><a :href="getUrl('guidelines')">Guidelines</a></li>
+        <li><a :href="getUrl('directories')">Directories</a></li>
+        <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
+        <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
+        <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
+        
+      </ul>
+      <ul class="menu">
+        <li>{{user.name}}</li>
+      </ul>
+    </div>
+
+    <label for="directory">Directory: </label>
+    <select v-model="directory" id="directory">
+        <option v-for="dir in directories" :value="dir._id.toString()">{{dir.name}} | {{dir.description}}</option>
+    </select>
+    <br>
+    <label for="glset">Guideline-Set: </label>
+    <select v-model="currentGLSet" id="glset" @change="ChangeCurrentGLSet">
+        <option v-for="glset in guidelinesets" :value="glset._id.toString()">{{glset.name }}</option>
+    </select>
+    <br>
+    <label for="guideline">Guidelines: </label>
+    <select v-model="guideline" id="guideline">
+        <option v-for="gl in guidelines" :value="gl._id.toString()">{{gl.nr}} | {{ gl.itemToCheck }} </option>
+    </select>
+    <br>
+    <label for="name">Name of Query:</label>
+    <input id="name" v-model="name" type="text">
+    <br>
+    <input type="checkbox" id="personal" name="personal" v-model="personal">
+    <label for="personal">Only My own prompts</label>
+    <br>
+    <input type="checkbox" id="successful" name="successful" v-model="successful">
+    <label for="successful">Only successful prompts</label>
+    <br>
+    <button @click="GetQueries">Search</button>
+    <br><br>
+    <ul>
+        <li v-for="query in queries">
+            {{query.name}} | Prompt: {{query.prompt}} | Correct Passage: {{query.containsCorrectPassage}} || <a :href="getUrl('vectorquery/edit/'+query._id.toString())">edit</a>
+        </li>
+    </ul>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+
+<script type="module">
+    import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+    const API_URL="http://localhost:3000/";
+
+    createApp({
+      data() {
+        return {
+            currentNamespace:'',
+            guidelinesets: [],
+            currentGLSet:'',
+            directories: [],
+            directories:[],
+            guidelines:[],
+            guideline:null,
+            directory:null,
+
+            queries: [],
+            user:{},
+
+            name:'',
+            personal:false,
+            successful:false,
+        }
+      },
+      methods:{
+        async getUser(){
+            try{
+                await axios.get(API_URL+'users/getuser')
+                .then(response => {
+                    this.user = response.data.user;
+                })
+            } catch(error){
+                console.log(error);
+            }
+        },
+        async GetQueries(){
+            await axios.post(API_URL+'vec/find', {
+                directory:this.directory,
+                guideline:this.guideline,
+                name:this.name,
+                personal:this.personal,
+                successful:this.successful
+            
+            })
+                .then((response) => {
+                    this.queries = response.data;
+                    console.log("response: "+response.data);
+                })
+        },
+        async GetDirectories (){
+            await axios.get(API_URL+'dirs/getall')
+                .then((response) => {
+                    this.directories = response.data;
+                })
+        },
+        async GetGuidelineSets (){
+            await axios.get(API_URL+'guidelines/getsets')
+                .then(response => {
+                    console.log(response.data);
+                    this.guidelinesets = response.data;
+                });
+        },
+        async GetCurrentGuidelineSet (){
+            await axios.get(API_URL+'users/getcurrentglset')
+                .then(async (response) => {
+                    if(response.data.error){
+                        console.log(response.data.error);
+                    }
+                    else{
+                        this.currentGLSet = response.data._id.toString();
+                        await this.GetGuidelines(response.data._id.toString());
+                    }
+
+                })
+        },
+        async ChangeCurrentGLSet(){
+            await axios.post(API_URL+'users/updatecurrentglset', {guidelineset:this.currentGLSet})
+            .then(async response => {
+                console.log(response);
+                await this.GetGuidelines(this.currentGLSet);
+            })
+        },
+        
+        async GetGuidelines(id){
+            if(id != ''){
+                await axios.post(API_URL+'guidelines/bysetid', {
+                    id: id
+                })
+                    .then((response) => {
+                        this.guidelines = response.data;
+                    })
+            }
+            
+            
+        },
+        getUrl(tag){
+            return API_URL+tag;
+            
+        },
+        async GetCurrentNamespace(){
+            try{
+                await axios.get(API_URL+'users/getcurrentnamespace')
+                .then(response => {
+                    this.currentNamespace = response.data.namespace;
+                    
+                })
+            } catch(error){
+                console.log(error);
+            }
+        },
+        async GetNamespaces(){
+            try{
+                await axios.get(API_URL+'users/getnamespaces')
+                .then(response => {
+                    this.namespaces = response.data.namespaces;
+                })
+
+            } catch(error){
+                console.log(error);
+            }
+        },
+        async ChangeCurrentNamespace(){
+            try{
+                await axios.post(API_URL+'users/updatecurrentnamespace', {
+                currentNamespace:this.currentNamespace
+                })
+            } catch(error){
+                console.log(error);
+            }
+        }
+        },
+        async mounted(){
+            await this.GetNamespaces();
+            await this.GetCurrentNamespace();
+            await this.GetDirectories();
+            await this.GetGuidelineSets();
+            await this.GetCurrentGuidelineSet();
+            await this.getUser();
+            
+        }
+        
+      }).mount('#app')
+  </script>
+
+
+<style>
+
+    #menubar {
+     display: flex;
+     justify-content: space-between;
+     padding: 10px;
+   }
+  
+   .menu {
+     list-style: none;
+     margin: 0;
+     padding: 0;
+     display: flex;
+   }
+  
+   .menu li {
+     margin-right: 15px;
+   }
+  
+  </style>

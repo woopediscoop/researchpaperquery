@@ -3,7 +3,10 @@
     <div id="menubar">
       <ul class="menu">
         <li><a :href="getUrl('home')">Home</a></li>
+        <li><a :href="getUrl('guidelines')">Guidelines</a></li>
+        <li><a :href="getUrl('directories')">Directories</a></li>
         <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
+        <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
         <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
       </ul>
       <ul class="menu">
@@ -29,7 +32,7 @@
 
 <script type="module">
     import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-    const API_URL="https://researchpaperquery.onrender.com/";
+    const API_URL="http://localhost:3000/";
 
     createApp({
       data() {
@@ -37,10 +40,21 @@
             currentNamespace:'',
             VecPrompt:'',
             whatsup:'',
-            results: []
+            results: [],
+            user:{},
         }
       },
       methods:{
+        async getUser(){
+            try{
+                await axios.get(API_URL+'users/getuser')
+                .then(response => {
+                    this.user = response.data.user;
+                })
+            } catch(error){
+                console.log(error);
+            }
+        },
         async Search(){
             try{
                 if(this.VecPrompt != ''){
@@ -94,9 +108,10 @@
             }
         }
         },
-        mounted(){
-            this.GetNamespaces();
-            this.GetCurrentNamespace();
+        async mounted(){
+            await this.GetNamespaces();
+            await this.GetCurrentNamespace();
+            await this.getUser();
         }
         
       }).mount('#app')

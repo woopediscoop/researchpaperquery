@@ -1,7 +1,8 @@
-import mongoose, { mongo } from "mongoose";  
+import mongoose from "mongoose";  
 
 const GuidelineSetSchema = new mongoose.Schema({
     name:{type:String, required: true},
+    description:{type:String},
  
     Author:{type:String, ref:'Author'},
     Guidelines:{type:Array<String>, ref:'Guidelines'}
@@ -31,6 +32,7 @@ const GuidelineSetSchema = new mongoose.Schema({
     _id:set_id,
     nr:nr
   });
+  export const updateGuideline = (id: string, values: Record<string, any>) => GuidelineModel.findByIdAndUpdate(id, values);
   export const getGuidelineById = (id: String) => GuidelineModel.findById(id);
-  export const deleteGuidelineById = (id : mongoose.Schema.Types.ObjectId) => GuidelineModel.findOneAndDelete({_id:id});
+  export const deleteGuidelineById = (id : string) => GuidelineModel.findOneAndDelete({_id:id});
  

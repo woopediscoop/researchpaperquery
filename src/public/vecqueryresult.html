@@ -1,0 +1,305 @@
+<div id="app">
+
+    <div id="menubar">
+      <ul class="menu">
+        <li><a :href="getUrl('home')">Home</a></li>
+        <li><a :href="getUrl('guidelines')">Guidelines</a></li>
+        <li><a :href="getUrl('directories')">Directories</a></li>
+        <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
+        <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
+        <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
+      </ul>
+      <ul class="menu">
+        <li>{{user.name}}</li>
+      </ul>
+    </div>
+
+    <h2>Query: </h2>
+    <label for="Name">Name: </label>
+    <input type="text" v-model="Name" id="Name">
+    <br>
+    <label for="directory">Directory: </label>
+    <span id="directory">{{Directory}}</span>
+    <br>
+    <label for="guideline">Guideline: </label>
+    <span id="guideline">{{Guideline}}</span>
+    <br>
+    <label for="query">Query: </label>
+    <span id="query">{{Query}}</span>
+    <br>
+    <label for="results">Results: </label>
+    <ul>
+        <li id="results" v-for="(match, index) in matches">{{index + 1}}: {{match}} <br><br></li>
+    </ul>
+
+    <h2>Evaluate:</h2>
+    <input type="checkbox" id="containsCorrectInput" name="containsCorrectInput" v-model="containsCorrect">
+    <label for="containsCorrectInput">Results contain correct passage</label>
+    <br>
+    <div id="corrPassage" v-if="containsCorrect">
+    <label for="passageNr">Nr. of correct Passage: </label>
+        <select v-model="selectedIndex" id="passageNr">
+            <option v-for="number in resIndexes">{{number+1}}</option>
+        </select>
+    </div>
+    <br>
+    <label for="correctPassage">Correct Passage in the Publication:</label>
+    <input type="text" v-model="correctPassage" id="correctPassage">
+    <br>
+    <label for="addNotes">Additional Notes about this Search:</label>
+    <input type="text" v-model="addNotes" id="addNotes">
+    <br>
+    <button @click="UpdateVectorQuery">Save</button>
+    <button @click="DeleteVectorQuery">Delete</button>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+
+<script type="module">
+    import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+    const API_URL="http://localhost:3000/";
+
+    const currentPath = window.location.pathname;
+
+    const pathSegments = currentPath.split('/');
+    const queryId = pathSegments[pathSegments.length - 1];
+    console.log("queryid:"+queryId);
+
+    createApp({
+      data() {
+        return {
+            currentNamespace:'',
+            guidelinesets: [],
+            currentGLSet:'',
+            matches:[],
+            containsCorrect: false,
+            selectedIndex: null,
+            correctPassage:'',
+            addNotes:'',
+            Name:'',
+
+            user:{},
+            guideline_id:'',
+            directory_id:'',
+
+            Directory:'',
+            GuidelineSet:'',
+            Guideline:'',
+            Query:'',
+
+            QueryID:queryId,
+
+            VectorQuery:{}
+
+        }
+      },
+      methods:{
+        async getUser(){
+            try{
+                await axios.get(API_URL+'users/getuser')
+                .then(response => {
+                    this.user = response.data.user;
+                })
+            } catch(error){
+                console.log(error);
+            }
+        },
+        async DeleteVectorQuery(){
+            
+           await axios.delete(API_URL+'vec/delete', {
+            params:{
+                vectorquery:queryId
+            }
+                
+            })
+            .then((response) => {
+                this.msg = response.data.message;
+                console.log(response.data.query);
+            });
+            window.location.href=API_URL+'filterqueries';
+        },
+        async UpdateVectorQuery(){
+            await axios.post(API_URL+'vec/eval', {
+                query_id:queryId, 
+                containsCorrectPassage:this.containsCorrect,
+                passage_nr:this.selectedIndex,
+                note: this.addNotes,
+                name:this.Name
+            })
+            .then((response) => {
+                console.log(response.data);
+            });
+            await this.MakeCorrectPassage();
+        },
+        async GetCorrectPassage(){
+            await axios.post(API_URL+'fulfilled/get', {
+                directory:this.directory_id, 
+                guideline:this.guideline_id
+            }).then((response) => {
+                if(response.data != null){
+                    const passages = response.data.passages;
+                    console.log(response.data.passages);
+                    this.correctPassage = passages;
+                    console.log("passage: "+passages);
+                }else{
+                    console.log("Aint no correct passage");
+                }
+            })
+        },
+        async MakeCorrectPassage(){
+            if(this.correctPassage != ''){
+                await axios.post(API_URL+'fulfilled/make', {
+                directory:this.directory_id, 
+                guideline:this.guideline_id,
+                passage:this.correctPassage,
+                vectorquery:queryId
+                }).then((response) => {
+                    console.log(response.data);
+                    const fulfilled = response.data;
+                    this.correctPassage = fulfilled.passages + " Added motherfucker";
+                })
+            }
+            
+        },
+        async GetVectorQuery(){
+            await axios.post(API_URL+'vec/getquery', {
+                vectorquery:queryId
+            })
+                .then((response) => {
+                    this.VectorQuery = response.data;
+                    this.Query = this.VectorQuery.prompt;
+                    this.matches = this.VectorQuery.results;
+                    if(this.VectorQuery.containsCorrectPassage){
+                        this.containsCorrect = this.VectorQuery.containsCorrectPassage;
+                    }
+                    if(this.VectorQuery.passageNr){
+                        this.selectedIndex = this.VectorQuery.passageNr;
+                    }
+                    console.log("Notes: "+this.VectorQuery.note);
+                    if(this.VectorQuery.note){
+                        this.addNotes = this.VectorQuery.note;
+                    }
+                    this.Name = this.VectorQuery.name
+                })
+
+        },
+        async GetDirectory(){
+            console.log(this.Vec)
+            await axios.post(API_URL+'dirs/getdir', {
+                directory:this.VectorQuery.Directory
+            })
+                .then((response) => {
+                    const dir = response.data;
+                    this.directory_id = dir._id.toString();
+                    this.Directory = dir.name;
+                })
+        },
+        async GetGL(){
+            console.log(this.VectorQuery.Guideline)
+            await axios.post(API_URL+'guidelines/get', {
+                guideline: this.VectorQuery.Guideline
+            })
+                .then((response) => {
+                    const guideline = response.data;
+                    this.guideline_id = guideline._id.toString();
+                    this.Guideline = guideline.itemToCheck;
+                })
+        },
+        async GetQuery(){
+
+        },
+
+        getUrl(tag){
+            return API_URL+tag;
+            
+        },
+        async GetCurrentNamespace(){
+            try{
+                await axios.get(API_URL+'users/getcurrentnamespace')
+                .then(response => {
+                    this.currentNamespace = response.data.namespace;
+                    
+                })
+            } catch(error){
+                console.log(error);
+            }
+        },
+        async GetNamespaces(){
+            try{
+                await axios.get(API_URL+'users/getnamespaces')
+                .then(response => {
+                    this.namespaces = response.data.namespaces;
+                })
+
+            } catch(error){
+                console.log(error);
+            }
+        },
+        async ChangeCurrentNamespace(){
+            try{
+                await axios.post(API_URL+'users/updatecurrentnamespace', {
+                currentNamespace:this.currentNamespace
+                })
+            } catch(error){
+                console.log(error);
+            }
+        },
+
+        updateResIndexes(){
+            this.selectedIndex = null;
+        }
+        },
+        async mounted(){
+            await this.GetNamespaces();
+            await this.GetVectorQuery();
+            await this.GetDirectory();
+            await this.GetGL();
+            await this.GetCorrectPassage();
+            await this.getUser();
+        },
+        
+      computed: {
+        resIndexes() {
+            if(this.VectorQuery.results){
+                const range = [];
+                for (let i = 0; i < this.VectorQuery.results.length; i++){
+                    range.push(i);
+                }
+                return range;
+            }
+            return [];
+            
+        },
+        watch: {
+            VectorQuery: 'updateResIndexes'
+        }
+      }
+
+      },
+      ).mount('#app')
+  </script>
+
+
+<style>
+
+    #menubar {
+     display: flex;
+     justify-content: space-between;
+     padding: 10px;
+   }
+  
+   .menu {
+     list-style: none;
+     margin: 0;
+     padding: 0;
+     display: flex;
+   }
+  
+   .menu li {
+     margin-right: 15px;
+   }
+  
+  </style>

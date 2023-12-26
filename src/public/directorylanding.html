@@ -10,16 +10,14 @@
         <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
       </ul>
       <ul class="menu">
-        <li>{{user.username}}</li>
+        <li>{{user.name}}</li>
       </ul>
     </div>
 
-    <h2>Welcome!</h2>
-    <p>Update: Namespaces are now called Directories. 
-        <br>We Query now by Guideline and Directory, and filter them if they have the right result.
-        <br>Directories and Guidelines are now global for all Users.
-        <br>If you want to search for previous queries, you can do so in the Filter Queries tab.
-    </p>
+    <ul>
+        <li v-for="dir in directories">{{dir.name}} | from PDF {{dir.pdfname}} | {{dir.description}}</li>
+    </ul>
+    <button @click="NewDir">Create new Directory</button>
 
 </div>
 
@@ -35,7 +33,11 @@
       data() {
         return {
             currentNamespace:'',
+            guidelinesets: [],
+            directories:[],
+            currentGLSet:'',
             user:{},
+
         }
       },
       methods:{
@@ -49,8 +51,19 @@
                 console.log(error);
             }
         },
+        NewDir(){
+            window.location.href = API_URL+'directories/create'
+        },  
+        async getDirectories(){
+            await axios.get(API_URL+'dirs/getall')
+            .then((response) => {
+                this.directories = response.data;
+                console.log(this.directories);
+            })
+        },
         getUrl(tag){
             return API_URL+tag;
+            
         },
         async GetCurrentNamespace(){
             try{
@@ -86,7 +99,7 @@
         },
         async mounted(){
             await this.GetNamespaces();
-            await this.GetCurrentNamespace();
+            await this.getDirectories();
             await this.getUser();
         }
         

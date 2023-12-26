@@ -15,8 +15,8 @@ const tiktoken_len = (text) => {
 
 const textToChunks = async (textdata) => {
     const textsplitter = new RecursiveCharacterTextSplitter()
-    textsplitter.chunkSize = 250;
-    textsplitter.chunkOverlap = 20;
+    textsplitter.chunkSize = 350;
+    textsplitter.chunkOverlap = 35;
     textsplitter.lengthFunction =tiktoken_len;
     textsplitter.separators=["\n\n", "\n", " ", ""];
 
@@ -26,7 +26,7 @@ const textToChunks = async (textdata) => {
 const model_name = 'text-embedding-ada-002';
 const embed = new OpenAIEmbeddings( {
     modelName:model_name,
-    openAIApiKey:process.env.OPENAI_API_KEY
+    openAIApiKey:'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'
 });
 
 const Embeddings = (chunks) => {
@@ -42,48 +42,63 @@ const pinecone = new Pinecone({
     environment:PINE_ENV,
 });
 
-const CreateIndex = async (name, namespace, res, chunks) => {
+const CreateIndex = async (name, directory, res, chunks) => {
     try{
+        console.log(directory);
+        const IndexCreation = async () => {
+            try{
+                const indexes = await pinecone.listIndexes();
+                if(!indexes.includes(name)){
+                    await pinecone.createIndex({
+                        name:name,
+                        dimension:1536,
+                        metric:'cosine'
+                })
+            }
+            } catch(error){
+                console.log(error);
+                return {createdIndex:false,
+                        upserted:false};
+            }
+        }
         
-        const indexes = await pinecone.listIndexes();
-        if(!indexes.includes(name)){
-            await pinecone.createIndex({
-                name:name,
-                dimension:1536,
-                metric:'cosine'
-        })
-    }
-    } catch(error){
-        console.log(error);
-    }
-    
-    const index = pinecone.index(name);
-    const currentNamespace = index.namespace(namespace)
+        
+        console.log(directory);
+        const index = pinecone.index(name);
+        const currentNamespace = index.namespace(directory);
 
-    let toUpsert = [];
-    for(let i = 0; i < res.length; i++){
-        toUpsert.push({id:"vec"+i.toString(),values: res[i], metadata: {"text":chunks[i]}})
-    }
+        let toUpsert = [];
+        for(let i = 0; i < res.length; i++){
+            toUpsert.push({id:"vec"+i.toString(),values: res[i], metadata: {"text":chunks[i]}})
+        }
 
-    try{
-        await currentNamespace.upsert(toUpsert);
-    }
-    catch(error){
+
+        try{
+            await currentNamespace.upsert(toUpsert);
+            return {createdIndex:true,
+                    upserted:true};
+        }
+        catch(error){
+            return {createdIndex:true,
+                    upserted:false};
+        }
+    }catch(error){
         console.log(error)
     }
+    
 }
 
 export const QueryPine = async (name, namespace, query) => {
     try{
             const index = pinecone.index(name);
             const currentNamespace = index.namespace(namespace);
-            console.log(await Embeddings([query]));
             const querychunk = await Embeddings([query]);
             const response = await currentNamespace.query({
                 topK:4,
                 vector:querychunk[0],
                 includeMetadata:true,
             })
+            console.log(response);
             return response.matches
         
         
@@ -98,11 +113,12 @@ export const PineUpload = async (index, namespace, text) => {
     try{
         const chunks = await textToChunks(text);
         const embeddings = await Embeddings(chunks);
-        await CreateIndex(index,namespace, embeddings, chunks); 
-        return true;
+        const response = await CreateIndex(index, namespace, embeddings, chunks); 
+        return response;
     } catch (error) {
         console.log(error);
-        return false;
+        return {createdIndex:false,
+                upserted:false};
     }
 
 

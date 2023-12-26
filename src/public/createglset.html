@@ -11,18 +11,18 @@
       </ul>
       <ul class="menu">
         <li>
-            <select v-model="currentNamespace" @change="ChangeCurrentNamespace">
-                <option v-for="ns in namespaces" :value="ns">{{ns}}</option>
-            </select>
-        </li>
-        <li><a :href="getUrl('uploadpdf')">Add Namespace</a></li>
+            <li>{{user.name}}</li>
       </ul>
     </div>
-    <label for="NamespaceTxt">Namespace</label>
-    <input type="text" v-model="NamespaceTxt" id="NamespaceTxt">
-    <input type="file" accept="pdf" ref="pdfInput">
-    <button @click="UpdateNamespace()">Hochladen</button>
-    <p>{{status}}</p>
+
+    <h2>Create new Guidelineset</h2>
+    <label for="name">Name</label>
+    <input type="text" v-model="name" id="name">
+    <br>
+    <label for="description">Description</label>
+    <input type="text" v-model="description" id="description">
+    <br>
+    <button @click="CreateGLSet">Create new Set</button>
     <p>{{msg}}</p>
 
 </div>
@@ -39,61 +39,33 @@
       data() {
         return {
             currentNamespace:'',
-            status:'',
-            NamespaceTxt:'',
             msg:''
         }
       },
       methods:{
-        async UpdateNamespace(){
-            const fileInput = this.$refs.pdfInput;
-            const pdf = fileInput.files[0];
-            if(this.NamespaceTxt != '' && pdf){
-                try{
-                    axios.post(API_URL+'users/updatenamespaces', {"newnamespace":this.NamespaceTxt})
-                    .then(response => {
-                        this.msg = response.data.message;
-                        if(response.data.success){
-                            this.namespaces.push(this.NamespaceTxt);
-                            this.currentNamespace = this.NamespaceTxt;
-                            this.submitPDF();
-                        }
-                    });
-                }
-                catch(error){
-                    this.msg = "Namespace exists already"
-                }
-            }else{
-                this.status="Namespace bennenen und PDF hochladen!";
+        async getUser(){
+            try{
+                await axios.get(API_URL+'users/getuser')
+                .then(response => {
+                    this.user = response.data.user;
+                })
+            } catch(error){
+                console.log(error);
             }
         },
-        async submitPDF(){
-            const fileInput = this.$refs.pdfInput;
-            const pdf = fileInput.files[0];
-
-            if(pdf){
-                this.status = "Lädt hoch, bitte warten";
-                const formData = new FormData();
-                formData.append('File',pdf);
-                formData.append('namespace',this.currentNamespace);
-                console.log(...formData)
-                await axios.post(API_URL+'postpdf', formData, {
-                    headers: {
-                        'Content-Type' : 'multipart/form-data',
-                    },
-                })
+        async CreateGLSet(){
+            await axios.post(API_URL+'guidelines/createset', {
+                name:this.name,
+                description:this.description
+            })
                 .then(response => {
-                    console.log('File uploaded successfully', response)
-                    if(response.data.success){
-                        this.status = "PDF hochgeladen auf Namespace "+this.currentNamespace+"! \n Jetzt können Sie Vektorsuchanfragen und LLM Prompts auf diesem Index durchführen."
+                    if(response.data.error){
+                        this.msg = response.data.error;
                     }
-                    })
-                .catch(error => {
-                    console.error('Error uploading file',error)
+                    else{
+                        this.msg = response.data;
+                    }
                 })
-            }else{
-                console.warn('No file selected')
-            }
         },
         getUrl(tag){
             return API_URL+tag;
@@ -133,6 +105,7 @@
         async mounted(){
             await this.GetNamespaces();
             await this.GetCurrentNamespace();
+            await this.getUser();
         }
         
       }).mount('#app')
