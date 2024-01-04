@@ -123,8 +123,7 @@ export const makeVectorQuery = async (req: express.Request, res: express.Respons
         res.json(VecQuery);
 
     } catch(error){
-        console.log(error);
-        return res.sendStatus(400);
+        return res.json({error:error});
     }
     
 }
