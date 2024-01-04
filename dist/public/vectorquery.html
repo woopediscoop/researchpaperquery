@@ -88,7 +88,12 @@
                     name:this.queryname
                 })
                     .then((response => {
-                        window.location.href=API_URL+'vectorquery/edit/'+response.data._id;
+                        if(response.data.error){
+                            console.log(response.data.error);
+                        }
+                        else{
+                            window.location.href=API_URL+'vectorquery/edit/'+response.data._id;
+                        }
                     }))
             }
             
