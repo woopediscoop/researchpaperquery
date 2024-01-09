@@ -32,7 +32,7 @@
     </select>
     <br>
     <label for="notes">Additional Info</label>
-    <input v-model="guideline.notes" id="notes" type="text">
+    <input v-model="guideline.note" id="notes" type="text">
     <br>
     <button @click="UpdateGuideline">Update Guideline</button>
     <button @click="DeleteGuideline">Delete Guideline</button>
@@ -115,7 +115,7 @@
                         itemToCheck:this.guideline.itemToCheck,
                         description:this.guideline.description,
                         importance:this.guideline.importance,
-                        note:this.guideline.notes
+                        note:this.guideline.note
                     }
                     
                 })
