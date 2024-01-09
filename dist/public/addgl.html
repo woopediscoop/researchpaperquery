@@ -39,7 +39,7 @@
 
     <h3>All {{currentGLSet.name}}</h3>
     <ul>
-        <li v-for="gl in guidelines">{{gl.nr}} | {{gl.itemToCheck}} | {{gl.importance}} | Description: {{gl.description}} | Notes: {{gl.note}} || <a :href="getUrl('guidelines/edit/'+gl._id.toString())">edit</a></li>
+        <li v-for="gl in sortedguidelines">{{gl.nr}} | {{gl.itemToCheck}} | {{gl.importance}} | Description: {{gl.description}} | Notes: {{gl.note}} || <a :href="getUrl('guidelines/edit/'+gl._id.toString())">edit</a></li>
     </ul>
 
     <br>
@@ -76,6 +76,11 @@
             msg:''
         }
       },
+    computed:{
+        sortedguidelines() {
+            return this.guidelines.slice().sort((a, b) => a.nr - b.nr);
+        }
+    },
       methods:{
         async getUser(){
             try{
