@@ -110,7 +110,8 @@
                     itemToCheck:this.itemToCheck,
                     description:this.description,
                     importance:this.importance,
-                    GuidelineSetId:this.currentGLSet._id
+                    GuidelineSetId:this.currentGLSet._id,
+                    note:this.note
                 })
                 .then(async (response) => {
                     if(response.data.error){
