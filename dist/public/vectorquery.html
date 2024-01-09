@@ -28,7 +28,7 @@
     <br>
     <label for="guideline">Guidelines: </label>
     <select v-model="guideline" id="guideline">
-        <option v-for="gl in guidelines" :value="gl._id.toString()">{{gl.nr}} | {{ gl.itemToCheck }} | {{gl.importance}} </option>
+        <option v-for="gl in sortedguidelines" :value="gl._id.toString()">{{gl.nr}} | {{ gl.itemToCheck }} | {{gl.importance}} </option>
     </select>
     <br>
     <label for="query">VecSearch Query: </label>
@@ -67,6 +67,13 @@
 
         }
       },
+        computed:{
+            sortedguidelines(){
+                return this.guidelines.slice().sort((a,b) => {
+                    return a.nr - b.nr;
+                }
+            }
+        }
       methods:{
         async getUser(){
             try{
