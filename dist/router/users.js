@@ -8,7 +8,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const index_name = 'pdfsearch';
 export default (router) => {
-    router.get('/users', isAuthenticated, getAllUsers);
+    router.get('/users', getAllUsers);
     router.get('/users/getuser', isAuthenticated, getCurrentUser);
     router.post('/users/updatenamespaces', postNamespaceBySessionToken);
     router.post('/users/updatecurrentnamespace', selectNamespaceBySessionToken);
