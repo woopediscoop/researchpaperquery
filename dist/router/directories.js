@@ -5,7 +5,7 @@ import PdfParse from 'pdf-parse';
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 export default (router) => {
-    router.get('/dirs/getall', isAuthenticated, getAllDirectories);
+    router.get('/dirs/getall', getAllDirectories);
     router.post('/dirs/getdir', isAuthenticated, getDirectory);
     router.post('/dirs/makedir', isAuthenticated, makeDirectory);
     router.delete('/dirs/delete', deleteDirectory);
