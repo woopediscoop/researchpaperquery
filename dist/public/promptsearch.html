@@ -18,10 +18,7 @@
         <li><a :href="getUrl('uploadpdf')">Add Namespace</a></li>
       </ul>
     </div>
-    <label for="VecPrompt">Vektorsuchprompt: </label>
-    <input type="text" id="VecPropmt" v-model="VecPrompt">
-    <br>
-    <label for="LLMPrompt">LLM Prompt: </label>
+    <label for="LLMPrompt">Prompt: </label>
     <input type="text" id="LLMPrompt" v-model="LLMPrompt">
     <button @click="Search()">Suchen!</button>
     <p>{{res}}</p>
@@ -39,7 +36,6 @@
       data() {
         return {
             currentNamespace:'',
-            VecPrompt:'',
             LLMPrompt:'',
             res:''
         }
@@ -47,15 +43,12 @@
       methods:{
         async Search(){
             try{
-                if(this.VecPrompt != '' && this.LLMPrompt != ''){
+                if(this.LLMPrompt != ''){
                     this.res = "In progress! Please wait"
                     axios.post(API_URL+'promptquery', {
-                        'name':'pdfsearch',
-                        'namespace':this.currentNamespace,
-                        'vecprompt':this.VecPrompt,
                         'llmprompt':this.LLMPrompt
                     }).then(response => {
-                        this.res = response.data.content;
+                        this.res = response.data;
                     })
                 }
                 else{
