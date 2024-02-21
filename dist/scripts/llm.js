@@ -8,6 +8,6 @@ export const Prompt = async (llmprompt) => {
         messages: [{ role: 'user', content: prompt }],
         model: 'gpt-4-0125-preview',
     });
-    return chatCompletion.choices[0].message;
+    return chatCompletion.choices[0].message.content;
 };
 //# sourceMappingURL=llm.js.map
