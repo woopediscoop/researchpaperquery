@@ -141,14 +141,7 @@ export const vectorQuery = async (req: express.Request, res: express.Response) =
 }
 
 export const promptQuery = async (req: express.Request, res: express.Response) => {
-    const matches = await QueryPine(req.body.name, req.body.namespace, req.body.vecprompt)
-    let excerpts = "";
-    for(let i = 0; i < matches.length; i++){
-        
-        excerpts += i.toString()+": "+matches[i].metadata.text.toString()+"\n\n\n";
-    }
-    console.log(excerpts)
-    const llmResponse = await Prompt(excerpts, req.body.llmprompt);
+    const llmResponse = await Prompt(req.body.llmprompt);
     return res.json(llmResponse);
 }
 
