@@ -1,13 +1,11 @@
-import express from "express";
+import express from 'express';
+import multer from 'multer';
+import PdfParse from 'pdf-parse';
+
 import {
-  getAllDirectories,
-  makeDirectory,
-  getDirectory,
-  deleteDirectory,
-} from "../controllers/directories.js";
-import { isAuthenticated } from "../middlewares/index.js";
-import multer from "multer";
-import PdfParse from "pdf-parse";
+    deleteDirectory, getAllDirectories, getDirectory, makeDirectory
+} from '../controllers/directories.js';
+import { isAuthenticated } from '../middlewares/index.js';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });

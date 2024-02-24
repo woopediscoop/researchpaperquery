@@ -1,25 +1,15 @@
-import express from "express";
-import multer from "multer";
-import PdfParse from "pdf-parse";
+import express from 'express';
+import multer from 'multer';
+import PdfParse from 'pdf-parse';
 
+import { getCurrentGLSet } from '../controllers/guidelines.js';
 import {
-  getAllUsers,
-  postNamespaceBySessionToken,
-  selectNamespaceBySessionToken,
-  getNamespacesBySessionToken,
-  getCurrentNamespaceBySessionToken,
-  updateUserCurrentGLSet,
-  getCurrentUser,
-  vectorQuery,
-  promptQuery,
-} from "../controllers/users.js";
-import {
-  isAuthenticated,
-  deleteUser,
-  existsNamespace,
-} from "../middlewares/index.js";
-import { QueryPine, PineUpload } from "../scripts/pinecone.js";
-import { getCurrentGLSet } from "../controllers/guidelines.js";
+    getAllUsers, getCurrentNamespaceBySessionToken, getCurrentUser, getNamespacesBySessionToken,
+    postNamespaceBySessionToken, promptQuery, selectNamespaceBySessionToken, updateUserCurrentGLSet,
+    vectorQuery
+} from '../controllers/users.js';
+import { deleteUser, existsNamespace, isAuthenticated } from '../middlewares/index.js';
+import { PineUpload, QueryPine } from '../scripts/pinecone.js';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });

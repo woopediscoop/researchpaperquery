@@ -1,18 +1,10 @@
-import express from "express";
+import express from 'express';
+
 import {
-  makeGuidelineSet,
-  getCurrentGLSet,
-  addGuidelineToSet,
-  getAllGuidelineSets,
-  deleteGuidelineSet,
-  guidelinesBySetId,
-  getGuidelineSet,
-  getGuideline,
-  GetFulfilledGuideline,
-  MakeOrUpdateFulfilledGuideline,
-  updateGuidelineSetById,
-  deleteGuideline,
-} from "../controllers/guidelines.js";
+    addGuidelineToSet, deleteGuideline, deleteGuidelineSet, getAllGuidelineSets, getCurrentGLSet,
+    GetFulfilledGuideline, getGuideline, getGuidelineSet, guidelinesBySetId, makeGuidelineSet,
+    MakeOrUpdateFulfilledGuideline, updateGuidelineSetById
+} from '../controllers/guidelines.js';
 
 export default (router: express.Router) => {
   router.post("/guidelines/createset", makeGuidelineSet);

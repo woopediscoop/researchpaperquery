@@ -1,12 +1,9 @@
-import express from "express";
-import pkg from "lodash";
-const { merge } = pkg;
+import express from 'express';
+import pkg from 'lodash';
 
-import {
-  deleteUserById,
-  getUserBySessionToken,
-  getUsers,
-} from "../db/users.js";
+import { deleteUserById, getUserBySessionToken, getUsers } from '../db/users.js';
+
+const { merge } = pkg;
 
 export const isAuthenticated = async (
   req: express.Request,

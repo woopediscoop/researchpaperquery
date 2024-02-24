@@ -1,19 +1,14 @@
-import express from "express";
+import express from 'express';
+import { create } from 'lodash';
 
+import { getDirectoryById } from '../db/directories.js';
+import { getUserBySessionToken, updateUserById } from '../db/users.js';
 import {
-  createVectorQuery,
-  getVectorQueriesByGuideline,
-  getVectorQueriesByGuidelineAndUser,
-  getVectorQueriesByUserAndGuidelineSet,
-  updateVectorQueryById,
-  deleteVectorQueryById,
-  getVectorQueryById,
-  queryVectorQueries,
-} from "../db/vectorqueries.js";
-import { QueryPine } from "../scripts/pinecone.js";
-import { getDirectoryById } from "../db/directories.js";
-import { getUserBySessionToken, updateUserById } from "../db/users.js";
-import { create } from "lodash";
+    createVectorQuery, deleteVectorQueryById, getVectorQueriesByGuideline,
+    getVectorQueriesByGuidelineAndUser, getVectorQueriesByUserAndGuidelineSet, getVectorQueryById,
+    queryVectorQueries, updateVectorQueryById
+} from '../db/vectorqueries.js';
+import { QueryPine } from '../scripts/pinecone.js';
 
 export const evaluateQuery = async (
   req: express.Request,

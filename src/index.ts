@@ -1,15 +1,17 @@
-import express from "express";
-import http from "http";
-import bodyParser from "body-parser";
-import cookieParser from "cookie-parser";
-import compression from "compression";
-import cors from "cors";
-import mongoose from "mongoose";
-import router from "./router/index.js";
-import { fileURLToPath } from "url";
-import path from "path";
-import multer from "multer";
-import PdfParse from "pdf-parse";
+import bodyParser from 'body-parser';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
+import http from 'http';
+import mongoose from 'mongoose';
+import multer from 'multer';
+import path from 'path';
+import PdfParse from 'pdf-parse';
+import { fileURLToPath } from 'url';
+
+import router from './router/index.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

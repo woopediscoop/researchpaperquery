@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const ResultsSchema = new mongoose.Schema({
   correct: { type: Boolean, required: true },

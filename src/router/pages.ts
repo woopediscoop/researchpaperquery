@@ -1,22 +1,12 @@
-import express from "express";
+import express from 'express';
+
 import {
-  renderLoginPage,
-  renderNamespaceManager,
-  renderHomePage,
-  renderPdfUpload,
-  renderVectorSearch,
-  renderPromptSearch,
-  renderGuidelinePage,
-  renderCreateGLSet,
-  renderCreateGLPage,
-  renderDirectoryPage,
-  renderCreateDir,
-  renderVectorQuery,
-  renderQueryResult,
-  renderFilterQueries,
-  renderEditGuideline,
-} from "../controllers/pages.js";
-import { isAuthenticated } from "../middlewares/index.js";
+    renderCreateDir, renderCreateGLPage, renderCreateGLSet, renderDirectoryPage,
+    renderEditGuideline, renderFilterQueries, renderGuidelinePage, renderHomePage, renderLoginPage,
+    renderNamespaceManager, renderPdfUpload, renderPromptSearch, renderQueryResult,
+    renderVectorQuery, renderVectorSearch
+} from '../controllers/pages.js';
+import { isAuthenticated } from '../middlewares/index.js';
 
 export default (router: express.Router) => {
   router.get("/", isAuthenticated, renderHomePage);

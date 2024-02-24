@@ -1,8 +1,9 @@
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { model } from "mongoose";
-import tiktoken from "tiktoken";
-import { Pinecone } from "@pinecone-database/pinecone";
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { model } from 'mongoose';
+import tiktoken from 'tiktoken';
+
+import { Pinecone } from '@pinecone-database/pinecone';
 
 const tokenizer = tiktoken.get_encoding("cl100k_base");
 const tiktoken_len = (text) => {

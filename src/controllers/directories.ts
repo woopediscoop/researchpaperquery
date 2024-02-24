@@ -1,20 +1,12 @@
-import express from "express";
+import express from 'express';
 
 import {
-  createDirectory,
-  getDirectories,
-  getDirectoryById,
-  deleteDirectoryById,
-} from "../db/directories.js";
-import { getUserBySessionToken } from "../db/users.js";
-import { PineUpload } from "../scripts/pinecone.js";
-
-import {
-  createFulfilledGuideline,
-  getFulfilledGuidelineByGuidelineAndDirectory,
-  updateFulfilledGuidelineByGuidelineAndDirectory,
-  deleteFulfilledGuidelineById,
-} from "../db/directories.js";
+    createDirectory, createFulfilledGuideline, deleteDirectoryById, deleteFulfilledGuidelineById,
+    getDirectories, getDirectoryById, getFulfilledGuidelineByGuidelineAndDirectory,
+    updateFulfilledGuidelineByGuidelineAndDirectory
+} from '../db/directories.js';
+import { getUserBySessionToken } from '../db/users.js';
+import { PineUpload } from '../scripts/pinecone.js';
 
 export const noteCorrectPassage = async (
   req: express.Request,

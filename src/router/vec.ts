@@ -1,12 +1,9 @@
-import express from "express";
+import express from 'express';
+
 import {
-  evaluateQuery,
-  makeVectorQuery,
-  getVectoryQuery,
-  findQueries,
-  deleteQuery,
-} from "../controllers/vectorqueries.js";
-import { isAuthenticated } from "../middlewares/index.js";
+    deleteQuery, evaluateQuery, findQueries, getVectoryQuery, makeVectorQuery
+} from '../controllers/vectorqueries.js';
+import { isAuthenticated } from '../middlewares/index.js';
 
 export default (router: express.Router) => {
   router.post("/vec/makequery", isAuthenticated, makeVectorQuery);

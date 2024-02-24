@@ -1,10 +1,11 @@
-import express from "express";
-import authentication from "./authentication.js";
-import pages from "./pages.js";
-import users from "./users.js";
-import guidelines from "./guidelines.js";
-import vec from "./vec.js";
-import directories from "./directories.js";
+import express from 'express';
+
+import authentication from './authentication.js';
+import directories from './directories.js';
+import guidelines from './guidelines.js';
+import pages from './pages.js';
+import users from './users.js';
+import vec from './vec.js';
 
 const router = express.Router();
 //router.use(express.json)

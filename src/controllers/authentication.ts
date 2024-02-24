@@ -1,6 +1,7 @@
-import express from "express";
-import { getUserByEmail, createUser } from "../db/users.js";
-import { random, authentication } from "../helpers/index.js";
+import express from 'express';
+
+import { createUser, getUserByEmail } from '../db/users.js';
+import { authentication, random } from '../helpers/index.js';
 
 const host = "researchpaperquery.onrender.com";
 

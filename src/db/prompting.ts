@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const CheckingPromptSchema = new mongoose.Schema({
   setup_1: { type: String },

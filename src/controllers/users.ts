@@ -1,15 +1,12 @@
-import express from "express";
+import express from 'express';
+import pkg from 'lodash';
+import multer from 'multer';
+import PdfParse from 'pdf-parse';
 
-import {
-  getUsers,
-  getUserBySessionToken,
-  updateUserById,
-} from "../db/users.js";
-import { QueryPine } from "../scripts/pinecone.js";
-import { Prompt } from "../scripts/llm.js";
-import pkg from "lodash";
-import PdfParse from "pdf-parse";
-import multer from "multer";
+import { getUserBySessionToken, getUsers, updateUserById } from '../db/users.js';
+import { Prompt } from '../scripts/llm.js';
+import { QueryPine } from '../scripts/pinecone.js';
+
 const { get } = pkg;
 
 export const getAllUsers = async (

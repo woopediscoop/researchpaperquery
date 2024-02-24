@@ -1,20 +1,21 @@
 import express from "express";
-import {
-  createGuidelineSet,
-  getGuidelineSets,
-  deleteGuidelineSetById,
-  deleteGuidelineById,
-  getGuidelineById,
-  createGuideline,
-  getGuidelineSetById,
-  updateGuidelineSet,
-  updateGuideline,
-} from "../db/guidelines.js";
+
 import {
   createFulfilledGuideline,
   getFulfilledGuidelineByGuidelineAndDirectory,
   updateFulfilledGuidelineByGuidelineAndDirectory,
 } from "../db/directories.js";
+import {
+  createGuideline,
+  createGuidelineSet,
+  deleteGuidelineById,
+  deleteGuidelineSetById,
+  getGuidelineById,
+  getGuidelineSetById,
+  getGuidelineSets,
+  updateGuideline,
+  updateGuidelineSet,
+} from "../db/guidelines.js";
 import { getUserBySessionToken } from "../db/users.js";
 
 export const getAllGuidelineSets = async (
