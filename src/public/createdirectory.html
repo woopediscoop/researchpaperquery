@@ -1,218 +1,225 @@
 <div id="app">
+  <div id="menubar">
+    <ul class="menu">
+      <li><a :href="getUrl('home')">Home</a></li>
+      <li><a :href="getUrl('guidelines')">Guidelines</a></li>
+      <li><a :href="getUrl('directories')">Directories</a></li>
+      <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
+      <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
+      <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
+    </ul>
+    <ul class="menu">
+      <li>{{user.name}}</li>
+    </ul>
+  </div>
 
-    <div id="menubar">
-      <ul class="menu">
-        <li><a :href="getUrl('home')">Home</a></li>
-        <li><a :href="getUrl('guidelines')">Guidelines</a></li>
-        <li><a :href="getUrl('directories')">Directories</a></li>
-        <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
-        <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
-        <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
-      </ul>
-      <ul class="menu">
-        <li>{{user.name}}</li>
-      </ul>
-    </div>
-
-    <h2>Create Directory</h2>
-    <label for="name">Name: </label>
-    <input v-model="name" id="name" type="text">
-    <br>
-    <label for="description">Description: </label>
-    <input v-model="description" id="description" type="text">
-    <br>
-    <label for="glset">Guideline-Set: </label>
-    <select id="glset" v-model="currentGLSet" @change="ChangeCurrentGLSet">
-        <option v-for="gset in guidelinesets" :value="gset.name">{{gset.name}}</option>
-    </select>
-    <br>
-    <label for="pdfInput">PDF: </label>
-    <input type="file" accept="pdf" ref="pdfInput">
-    <br>
-    <br>
-    <button @click="CreateDirectory">Create Directory</button>
-    <br>
-    <p>{{msg}}</p>
+  <h2>Create Directory</h2>
+  <label for="name">Name: </label>
+  <input v-model="name" id="name" type="text" />
+  <br />
+  <label for="description">Description: </label>
+  <input v-model="description" id="description" type="text" />
+  <br />
+  <label for="glset">Guideline-Set: </label>
+  <select id="glset" v-model="currentGLSet" @change="ChangeCurrentGLSet">
+    <option v-for="gset in guidelinesets" :value="gset.name">
+      {{gset.name}}
+    </option>
+  </select>
+  <br />
+  <label for="pdfInput">PDF: </label>
+  <input type="file" accept="pdf" ref="pdfInput" />
+  <br />
+  <br />
+  <button @click="CreateDirectory">Create Directory</button>
+  <br />
+  <p>{{msg}}</p>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
+  integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+></script>
 
 <script type="module">
-    import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-    const API_URL="https://researchpaperquery.onrender.com/";
+  import {
+    createApp,
+    ref,
+  } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+  const API_URL = "https://researchpaperquery.onrender.com/";
 
-    createApp({
-      data() {
-        return {
-            currentNamespace:'',
-            guidelinesets: [],
-            currentGLSet:'',
-            user:{},
+  createApp({
+    data() {
+      return {
+        currentNamespace: "",
+        guidelinesets: [],
+        currentGLSet: "",
+        user: {},
 
-            msg:'',
+        msg: "",
 
-            name:'',
-            description:'',
-
+        name: "",
+        description: "",
+      };
+    },
+    methods: {
+      async getUser() {
+        try {
+          await axios.get(API_URL + "users/getuser").then((response) => {
+            this.user = response.data.user;
+          });
+        } catch (error) {
+          console.log(error);
         }
       },
-      methods:{
-        async getUser(){
-            try{
-                await axios.get(API_URL+'users/getuser')
-                .then(response => {
-                    this.user = response.data.user;
-                })
-            } catch(error){
-                console.log(error);
+      async CreateDirectory() {
+        const fileInput = this.$refs.pdfInput;
+        const pdf = fileInput.files[0];
+        let isPDF;
+        if (pdf) {
+          const reader = new FileReader();
+          reader.onloadend = function () {
+            const arr = new Uint8Array(reader.result).subarray(0, 4);
+            const header = Array.from(arr)
+              .map((byte) => String.fromCharCode(byte))
+              .join("");
+            if (header === "%PDF") {
+              isPDF = true;
+            } else {
+              isPDF = false;
+              this.msg = "Only pdfs allowed!";
             }
-        },
-        async CreateDirectory(){
-            const fileInput = this.$refs.pdfInput;
-            const pdf = fileInput.files[0];
-            let isPDF;
-            if(pdf){
-                const reader = new FileReader();
-                reader.onloadend = function () {
-                    const arr = new Uint8Array(reader.result).subarray(0, 4);
-                    const header = Array.from(arr).map(byte => String.fromCharCode(byte)).join('');
-                    if (header === '%PDF') {
-                        isPDF = true;
-                    }else{
-                        isPDF = false;
-                        this.msg = "Only pdfs allowed!";
-                    }
-                } 
-                reader.readAsArrayBuffer(pdf);
+          };
+          reader.readAsArrayBuffer(pdf);
 
-                if(pdf && this.name != '' && this.currentGLSet != ''  ){ //&& isPDF
-                    console.log("uploading")
-                    this.msg = "uploading...";
-                    const pdftext = "";
-                    const formData = new FormData();
-                    formData.append('File',pdf);
-                    console.log(...formData)
+          if (pdf && this.name != "" && this.currentGLSet != "") {
+            //&& isPDF
+            console.log("uploading");
+            this.msg = "uploading...";
+            const pdftext = "";
+            const formData = new FormData();
+            formData.append("File", pdf);
+            console.log(...formData);
 
-                    const post = async () => {
-                        await axios.post(API_URL+'dirs/pdftotext', formData, {
-                        headers: {
-                            'Content-Type' : 'multipart/form-data',
-                        },
-                        }).then(async(response) => {
-                            const pdftext = response.data.text;
-                            await axios.post(API_URL+'dirs/makedir', {
-                            index:'pdfsearch',
-                            name:this.name,
-                            description:this.description,
-                            pdfname:pdf.name,
-                            pdftext:pdftext
-                        })
-                        .then((response) => {
-                            if(response.data.error){
-                                this.msg = response.data.error;
-                            }
-                            this.msg = response.data;
-                        });
-                        });
-                    }
-                    await post();
-
-                    } else {
-                        if(isPDF){
-                            this.msg = "Not all required fields fulfilled!";
-                        } else {
-                            this.msg = "File is not a PDF";
-                        }
-                    }
-            }   
-        },
-        async CreateNewGL() {
-            window.location.href= (API_URL+'guidelines/addgl')
-        },
-        async CreateNewGLSet(){
-            window.location.href = (API_URL+'guidelines/makeglset');
-        },
-        async ChangeCurrentGLSet(){
-            const glset_id = this.guidelinesets.find((glset) => glset.name == this.currentGLSet);
-            
-            await axios.post(API_URL+'users/updatecurrentglset', {guidelineset:glset_id})
-            .then(response => {
-                console.log(response);
-            })
-        },
-        async getGLSets(){
-            await axios.get(API_URL+'guidelines/getsets')
-                .then(response => {
-                    console.log(response.data);
-                    this.guidelinesets = response.data;
+            const post = async () => {
+              await axios
+                .post(API_URL + "dirs/pdftotext", formData, {
+                  headers: {
+                    "Content-Type": "multipart/form-data",
+                  },
+                })
+                .then(async (response) => {
+                  const pdftext = response.data.text;
+                  await axios
+                    .post(API_URL + "dirs/makedir", {
+                      index: "pdfsearch",
+                      name: this.name,
+                      description: this.description,
+                      pdfname: pdf.name,
+                      pdftext: pdftext,
+                    })
+                    .then((response) => {
+                      if (response.data.error) {
+                        this.msg = response.data.error;
+                      }
+                      this.msg = response.data;
+                    });
                 });
-        },
-        getUrl(tag){
-            return API_URL+tag;
-            
-        },
-        async GetCurrentNamespace(){
-            try{
-                await axios.get(API_URL+'users/getcurrentnamespace')
-                .then(response => {
-                    this.currentNamespace = response.data.namespace;
-                    
-                })
-            } catch(error){
-                console.log(error);
+            };
+            await post();
+          } else {
+            if (isPDF) {
+              this.msg = "Not all required fields fulfilled!";
+            } else {
+              this.msg = "File is not a PDF";
             }
-        },
-        async GetNamespaces(){
-            try{
-                await axios.get(API_URL+'users/getnamespaces')
-                .then(response => {
-                    this.namespaces = response.data.namespaces;
-                })
-
-            } catch(error){
-                console.log(error);
-            }
-        },
-        async ChangeCurrentNamespace(){
-            try{
-                await axios.post(API_URL+'users/updatecurrentnamespace', {
-                    currentNamespace:this.currentNamespace
-                })
-            } catch(error){
-                console.log(error);
-            }
+          }
         }
-        },
-        async mounted(){
-            await this.GetNamespaces();
-            await this.GetCurrentNamespace();
-            await this.getGLSets();
-            await this.getUser();
-        }
-        
-      }).mount('#app')
-  </script>
+      },
+      async CreateNewGL() {
+        window.location.href = API_URL + "guidelines/addgl";
+      },
+      async CreateNewGLSet() {
+        window.location.href = API_URL + "guidelines/makeglset";
+      },
+      async ChangeCurrentGLSet() {
+        const glset_id = this.guidelinesets.find(
+          (glset) => glset.name == this.currentGLSet,
+        );
 
+        await axios
+          .post(API_URL + "users/updatecurrentglset", {
+            guidelineset: glset_id,
+          })
+          .then((response) => {
+            console.log(response);
+          });
+      },
+      async getGLSets() {
+        await axios.get(API_URL + "guidelines/getsets").then((response) => {
+          console.log(response.data);
+          this.guidelinesets = response.data;
+        });
+      },
+      getUrl(tag) {
+        return API_URL + tag;
+      },
+      async GetCurrentNamespace() {
+        try {
+          await axios
+            .get(API_URL + "users/getcurrentnamespace")
+            .then((response) => {
+              this.currentNamespace = response.data.namespace;
+            });
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      async GetNamespaces() {
+        try {
+          await axios.get(API_URL + "users/getnamespaces").then((response) => {
+            this.namespaces = response.data.namespaces;
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      async ChangeCurrentNamespace() {
+        try {
+          await axios.post(API_URL + "users/updatecurrentnamespace", {
+            currentNamespace: this.currentNamespace,
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      },
+    },
+    async mounted() {
+      await this.GetNamespaces();
+      await this.GetCurrentNamespace();
+      await this.getGLSets();
+      await this.getUser();
+    },
+  }).mount("#app");
+</script>
 
 <style>
+  #menubar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+  }
 
-    #menubar {
-     display: flex;
-     justify-content: space-between;
-     padding: 10px;
-   }
-  
-   .menu {
-     list-style: none;
-     margin: 0;
-     padding: 0;
-     display: flex;
-   }
-  
-   .menu li {
-     margin-right: 15px;
-   }
-  
-  </style>
+  .menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+
+  .menu li {
+    margin-right: 15px;
+  }
+</style>

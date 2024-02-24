@@ -6,7 +6,7 @@ const PromptSchema = new mongoose.Schema({
   prompt: { type: String, required: true },
   entirePrompt: { type: String },
 
-  SystemPrompt : { type: String, ref: "SystemPrompt" },
+  SystemPrompt: { type: String, ref: "SystemPrompt" },
   Guideline: { type: String, required: true, ref: "Guideline" },
   Directory: { type: String, required: true, ref: "Directory" },
   User: { type: String, required: true, ref: "User" },

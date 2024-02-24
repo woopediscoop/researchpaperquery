@@ -1,17 +1,16 @@
-
 #menubar {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-  }
- 
-  .menu {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-  }
- 
-  .menu li {
-    margin-right: 15px;
-  }
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.menu li {
+  margin-right: 15px;
+}

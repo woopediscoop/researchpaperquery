@@ -1,113 +1,107 @@
 <div id="app">
-
-    <div id="menubar">
-      <ul class="menu">
-        <li><a :href="getUrl('home')">Home</a></li>
-        <li><a :href="getUrl('guidelines')">Guidelines</a></li>
-        <li><a :href="getUrl('directories')">Directories</a></li>
-        <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
-        <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
-        <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
-        
-      </ul>
-      <ul class="menu">
-        <li>{{user.name}}</li>
-      </ul>
-    </div>
-
+  <div id="menubar">
+    <ul class="menu">
+      <li><a :href="getUrl('home')">Home</a></li>
+      <li><a :href="getUrl('guidelines')">Guidelines</a></li>
+      <li><a :href="getUrl('directories')">Directories</a></li>
+      <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
+      <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
+      <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
+    </ul>
+    <ul class="menu">
+      <li>{{user.name}}</li>
+    </ul>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
+  integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+></script>
 
 <script type="module">
-    import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-    const API_URL="http://localhost:3000/";
+  import {
+    createApp,
+    ref,
+  } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+  const API_URL = "http://localhost:3000/";
 
-    createApp({
-      data() {
-        return {
-            currentNamespace:'',
-            guidelinesets: [],
-            currentGLSet:'',
-            user:{},
-
+  createApp({
+    data() {
+      return {
+        currentNamespace: "",
+        guidelinesets: [],
+        currentGLSet: "",
+        user: {},
+      };
+    },
+    methods: {
+      async getUser() {
+        try {
+          await axios.get(API_URL + "users/getuser").then((response) => {
+            this.user = response.data.user;
+          });
+        } catch (error) {
+          console.log(error);
         }
       },
-      methods:{
-        async getUser(){
-            try{
-                await axios.get(API_URL+'users/getuser')
-                .then(response => {
-                    this.user = response.data.user;
-                })
-            } catch(error){
-                console.log(error);
-            }
-        },
-        getUrl(tag){
-            return API_URL+tag;
-            
-        },
-        async GetCurrentNamespace(){
-            try{
-                await axios.get(API_URL+'users/getcurrentnamespace')
-                .then(response => {
-                    this.currentNamespace = response.data.namespace;
-                    
-                })
-            } catch(error){
-                console.log(error);
-            }
-        },
-        async GetNamespaces(){
-            try{
-                await axios.get(API_URL+'users/getnamespaces')
-                .then(response => {
-                    this.namespaces = response.data.namespaces;
-                })
-
-            } catch(error){
-                console.log(error);
-            }
-        },
-        async ChangeCurrentNamespace(){
-            try{
-                await axios.post(API_URL+'users/updatecurrentnamespace', {
-                currentNamespace:this.currentNamespace
-                })
-            } catch(error){
-                console.log(error);
-            }
+      getUrl(tag) {
+        return API_URL + tag;
+      },
+      async GetCurrentNamespace() {
+        try {
+          await axios
+            .get(API_URL + "users/getcurrentnamespace")
+            .then((response) => {
+              this.currentNamespace = response.data.namespace;
+            });
+        } catch (error) {
+          console.log(error);
         }
-        },
-        async mounted(){
-            await this.GetNamespaces();
-            await this.getUser();
+      },
+      async GetNamespaces() {
+        try {
+          await axios.get(API_URL + "users/getnamespaces").then((response) => {
+            this.namespaces = response.data.namespaces;
+          });
+        } catch (error) {
+          console.log(error);
         }
-        
-      }).mount('#app')
-  </script>
-
+      },
+      async ChangeCurrentNamespace() {
+        try {
+          await axios.post(API_URL + "users/updatecurrentnamespace", {
+            currentNamespace: this.currentNamespace,
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      },
+    },
+    async mounted() {
+      await this.GetNamespaces();
+      await this.getUser();
+    },
+  }).mount("#app");
+</script>
 
 <style>
+  #menubar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+  }
 
-    #menubar {
-     display: flex;
-     justify-content: space-between;
-     padding: 10px;
-   }
-  
-   .menu {
-     list-style: none;
-     margin: 0;
-     padding: 0;
-     display: flex;
-   }
-  
-   .menu li {
-     margin-right: 15px;
-   }
-  
-  </style>
+  .menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+
+  .menu li {
+    margin-right: 15px;
+  }
+</style>

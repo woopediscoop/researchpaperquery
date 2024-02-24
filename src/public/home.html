@@ -1,116 +1,115 @@
 <div id="app">
+  <div id="menubar">
+    <ul class="menu">
+      <li><a :href="getUrl('home')">Home</a></li>
+      <li><a :href="getUrl('guidelines')">Guidelines</a></li>
+      <li><a :href="getUrl('directories')">Directories</a></li>
+      <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
+      <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
+      <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
+    </ul>
+    <ul class="menu">
+      <li>{{user.username}}</li>
+    </ul>
+  </div>
 
-    <div id="menubar">
-      <ul class="menu">
-        <li><a :href="getUrl('home')">Home</a></li>
-        <li><a :href="getUrl('guidelines')">Guidelines</a></li>
-        <li><a :href="getUrl('directories')">Directories</a></li>
-        <li><a :href="getUrl('vectorsearch')">VecSearch</a></li>
-        <li><a :href="getUrl('filterqueries')">Filter Queries</a></li>
-        <li><a :href="getUrl('llmsearch')">Vec + Prompt</a></li>
-      </ul>
-      <ul class="menu">
-        <li>{{user.username}}</li>
-      </ul>
-    </div>
-
-    <h2>Welcome!</h2>
-    <p>Update: Namespaces are now called Directories. 
-        <br>We Query now by Guideline and Directory, and filter them if they have the right result.
-        <br>Directories and Guidelines are now global for all Users.
-        <br>If you want to search for previous queries, you can do so in the Filter Queries tab.
-    </p>
-
+  <h2>Welcome!</h2>
+  <p>
+    Update: Namespaces are now called Directories. <br />We Query now by
+    Guideline and Directory, and filter them if they have the right result.
+    <br />Directories and Guidelines are now global for all Users. <br />If you
+    want to search for previous queries, you can do so in the Filter Queries
+    tab.
+  </p>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"
+  integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+></script>
 
 <script type="module">
-    import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-    const API_URL="https://researchpaperquery.onrender.com/";
+  import {
+    createApp,
+    ref,
+  } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+  const API_URL = "https://researchpaperquery.onrender.com/";
 
-    createApp({
-      data() {
-        return {
-            currentNamespace:'',
-            user:{},
+  createApp({
+    data() {
+      return {
+        currentNamespace: "",
+        user: {},
+      };
+    },
+    methods: {
+      async getUser() {
+        try {
+          await axios.get(API_URL + "users/getuser").then((response) => {
+            this.user = response.data.user;
+          });
+        } catch (error) {
+          console.log(error);
         }
       },
-      methods:{
-        async getUser(){
-            try{
-                await axios.get(API_URL+'users/getuser')
-                .then(response => {
-                    this.user = response.data.user;
-                })
-            } catch(error){
-                console.log(error);
-            }
-        },
-        getUrl(tag){
-            return API_URL+tag;
-        },
-        async GetCurrentNamespace(){
-            try{
-                await axios.get(API_URL+'users/getcurrentnamespace')
-                .then(response => {
-                    this.currentNamespace = response.data.namespace;
-                    
-                })
-            } catch(error){
-                console.log(error);
-            }
-        },
-        async GetNamespaces(){
-            try{
-                await axios.get(API_URL+'users/getnamespaces')
-                .then(response => {
-                    this.namespaces = response.data.namespaces;
-                })
-
-            } catch(error){
-                console.log(error);
-            }
-        },
-        async ChangeCurrentNamespace(){
-            try{
-                await axios.post(API_URL+'users/updatecurrentnamespace', {
-                currentNamespace:this.currentNamespace
-                })
-            } catch(error){
-                console.log(error);
-            }
+      getUrl(tag) {
+        return API_URL + tag;
+      },
+      async GetCurrentNamespace() {
+        try {
+          await axios
+            .get(API_URL + "users/getcurrentnamespace")
+            .then((response) => {
+              this.currentNamespace = response.data.namespace;
+            });
+        } catch (error) {
+          console.log(error);
         }
-        },
-        async mounted(){
-            await this.GetNamespaces();
-            await this.GetCurrentNamespace();
-            await this.getUser();
+      },
+      async GetNamespaces() {
+        try {
+          await axios.get(API_URL + "users/getnamespaces").then((response) => {
+            this.namespaces = response.data.namespaces;
+          });
+        } catch (error) {
+          console.log(error);
         }
-        
-      }).mount('#app')
-  </script>
-
+      },
+      async ChangeCurrentNamespace() {
+        try {
+          await axios.post(API_URL + "users/updatecurrentnamespace", {
+            currentNamespace: this.currentNamespace,
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      },
+    },
+    async mounted() {
+      await this.GetNamespaces();
+      await this.GetCurrentNamespace();
+      await this.getUser();
+    },
+  }).mount("#app");
+</script>
 
 <style>
+  #menubar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+  }
 
-    #menubar {
-     display: flex;
-     justify-content: space-between;
-     padding: 10px;
-   }
-  
-   .menu {
-     list-style: none;
-     margin: 0;
-     padding: 0;
-     display: flex;
-   }
-  
-   .menu li {
-     margin-right: 15px;
-   }
-  
-  </style>
+  .menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+
+  .menu li {
+    margin-right: 15px;
+  }
+</style>
