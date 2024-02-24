@@ -9,6 +9,6 @@
     "typescript.format.enable": true,
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-      }
-    
+      },
+   "importSorter.generalConfiguration.sortOnBeforeSave": true,
 }
