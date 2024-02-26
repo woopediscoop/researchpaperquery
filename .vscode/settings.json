@@ -4,5 +4,11 @@
         ".vscode{,/**}"
     ],
     "appService.defaultWebAppToDeploy": "/subscriptions/ac4b46b8-7e6a-4f1c-95ea-e365fd2a24c1/resourceGroups/researchpaperquery/providers/Microsoft.Web/sites/researchpaperquery",
-    "appService.deploySubpath": "."
+    "appService.deploySubpath": ".",
+    "editor.formatOnSave": true,
+    "typescript.format.enable": true,
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      },
+   "importSorter.generalConfiguration.sortOnBeforeSave": true,
 }
